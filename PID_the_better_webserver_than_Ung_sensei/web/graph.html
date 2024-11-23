@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi-Series Plot</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <script src="data-manager.js"></script>
+    <script src="highcharts.js"></script>
+    <style>
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        background: white;
+      }
+      .title {
+        text-align: center;
+        color: #333;
+        font-family: Arial, sans-serif;
+        margin-bottom: 5px;
+      }
+      #plotContainer {
+        width: 100%;
+        height: 500px;
+      }
+      .description {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #666;
+      }
+      .description ul {
+        margin-top: 10px;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container"><div style="margin: 0 auto; align-items: center; text-align: center;"><button onclick="javascript:backHome()" style="background-color: gray; color: white">HOME</button></div>
+      <h2 class="title">Interactive Multi-Series Plot</h2>
+      <div id="plotContainer"></div>
+      <div class="description">
+        This plot shows three different process variables:
+        <ul>
+          <li>Process Variable (PV) - Blue</li>
+          <li>Setpoint (SP) - Red</li>
+          <li>Control Output (CO) - Green</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Initialize the chart
+      const chart = Highcharts.chart("plotContainer", {
+        chart: {
+          type: "line",
+          animation: Highcharts.svg,
+          events: {
+            load: function () {
+              // Store the chart instance
+              const series = this.series;
+
+              // Update every second
+              setInterval(function () {
+                const data =
+                  processManager.getVisualizationDataArr(sessionStorage);
+
+                // Update each series with new data
+                series[0].setData(data.pvValues, true, {}, false);
+                series[1].setData(data.spValues, true, {}, false);
+                series[2].setData(data.coValues, true, {}, false);
+
+                // Update x-axis categories
+                chart.xAxis[0].setCategories(data.timestamps);
+              }, 1000);
+            },
+          },
+        },
+        title: {
+          text: "Process Variables Real-time Monitor",
+        },
+        xAxis: {
+          title: {
+            text: "Time",
+          },
+          labels: {
+            rotation: -45,
+            useHTML: true,
+          },
+        },
+        yAxis: {
+          title: {
+            text: "Value",
+          },
+        },
+        tooltip: {
+          shared: true,
+          crosshairs: true,
+          useHTML: true,
+          pointFormat:
+            '<span style="color:{series.color}"></span> {series.name}: <b>{point.y}</b><br/>',
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false,
+            },
+          },
+          series: {
+            animation: false,
+          },
+        },
+        series: [
+          {
+            name: "PV",
+            data: [],
+            color: "#1e88e5",
+          },
+          {
+            name: "SP",
+            data: [],
+            color: "#e53935",
+          },
+          {
+            name: "CO",
+            data: [],
+            color: "#43a047",
+          },
+        ],
+        credits: {
+          enabled: false,
+        },
+        legend: {
+          enabled: true,
+          layout: "horizontal",
+          align: "center",
+          verticalAlign: "bottom",
+        },
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 500,
+              },
+              chartOptions: {
+                legend: {
+                  layout: "horizontal",
+                  align: "center",
+                  verticalAlign: "bottom",
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      // Initial data load
+      const initialData =
+        processManager.getVisualizationDataArr(sessionStorage);
+      chart.series[0].setData(initialData.pvValues);
+      chart.series[1].setData(initialData.spValues);
+      chart.series[2].setData(initialData.coValues);
+      chart.xAxis[0].setCategories(initialData.timestamps);
+
+      backHome = () => {
+        window.location.href = "index.html";
+      };
+    </script>
+  </body>
+</html>

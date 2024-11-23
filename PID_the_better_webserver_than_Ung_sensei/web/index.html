@@ -1,0 +1,715 @@
+<!-- AWP_In_Variable Name ='"Parameters".CO' -->
+<!-- AWP_In_Variable Name ='"Parameters".PV' -->
+<!-- AWP_In_Variable Name ='"Parameters".SP' -->
+<!-- AWP_In_Variable Name ='"Parameters".Manual_Auto' -->
+<!-- AWP_In_Variable Name ='"Man/Auto_HMI"' -->
+<!-- AWP_In_Variable Name ='"Parameters".Kp' -->
+<!-- AWP_In_Variable Name ='"Parameters".TI' -->
+<!-- AWP_In_Variable Name ='"Parameters".TD' -->
+<!-- AWP_In_Variable Name ='"Parameters".TSL' -->
+<!-- AWP_In_Variable Name ='"Parameters".TSH' -->
+<!-- AWP_In_Variable Name ='"ResetHMI"' -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <title>Hot Air Process</title>
+    <script src="data-manager.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      input {
+        text-align: center;
+      }
+      .container {
+        background-color: #d9d9d9;
+        padding: 20px;
+        border: 1px solid #ccc;
+        width: 800px;
+      }
+      .title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        /* margin-bottom: 20px; */
+        margin: 10px;
+      }
+      .column {
+        margin: 0 auto;
+        text-align: center;
+        align-items: center;
+      }
+      .bar {
+        margin: 0 auto;
+        margin-bottom: 10px;
+        align-items: center;
+        text-align: center;
+        width: 50px;
+        height: 200px;
+        border: 1px solid #000;
+        position: relative;
+      }
+      .bar-inner {
+        position: absolute;
+        margin: 0 auto;
+        bottom: 0;
+        width: 100%;
+      }
+      .bar.pv .bar-inner {
+        background-color: orange;
+      }
+      .bar.sp .bar-inner {
+        background-color: green;
+      }
+      .bar.co .bar-inner {
+        background-color: cyan;
+      }
+      .input-box {
+        margin-top: 10px;
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+      }
+      #dot-red {
+        display: inline-block;
+        height: 25px;
+        width: 25px;
+        background-color: red;
+        border-radius: 50%;
+        border-style: solid;
+      }
+      #dot-white {
+        display: inline-block;
+        height: 25px;
+        width: 25px;
+        background-color: white;
+        border-radius: 50%;
+        border-style: solid;
+      }
+      button {
+        padding: 10px;
+        font-size: 16px;
+        margin: 5px;
+      }
+      .group label,
+      .group input {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .group input {
+        width: 80px;
+        padding: 5px;
+        text-align: center;
+      }
+      .buttons {
+        text-align: center;
+        padding: 5px;
+      }
+      #A_M_button {
+        display: flex;
+        width: 100px;
+      }
+      #arrow-low-limit {
+        position: absolute;
+        bottom: 169px;
+        left: -20px;
+      }
+      #arrow-high-limit {
+        position: absolute;
+        bottom: 169px;
+        right: -20px;
+      }
+    </style>
+    <script src="jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <!-- "Login_Area" is defined in S7Web.css for S7-1500 CPUs and S7-1200 FW2.2-->
+    <div class="container">
+      <div class="title">Hot Air Process</div>
+      <div class="row">
+        <div class="column">
+          <div class="bar pv" id="bar-pv-parent">
+            <div id="arrow-low-limit">
+              <h4 id="arrow-low-limit-text">→</h4>
+            </div>
+            <div
+              class="bar-inner"
+              id="bar-pv"
+              style='height: :="Parameters".PV:%'
+            ></div>
+            <div id="arrow-high-limit">
+              <h4 id="arrow-high-limit-text">←</h4>
+            </div>
+          </div>
+          <div>PV</div>
+          <div id="text-box-pv-parent">
+            <input
+              type="text"
+              id="text-box-pv"
+              style="background-color: #d9d9d9"
+              class="input-box"
+              value=':="Parameters".PV:'
+              readonly
+            />
+          </div>
+        </div>
+        <div class="column">
+          <div class="bar sp" id="bar-sp-parent">
+            <div
+              class="bar-inner"
+              id="bar-sp"
+              style='height: :="Parameters".SP:%'
+            ></div>
+          </div>
+          <div>SP</div>
+          <input
+            type="text"
+            class="input-box"
+            name='"Parameters".SP'
+            id="SP-input-textbox"
+            min="0.0"
+            max="100.0"
+            value="00.000"
+          />
+        </div>
+        <div class="column">
+          <div class="bar co" id="bar-co-parent">
+            <div
+              class="bar-inner"
+              id="bar-co"
+              style='height: :="Parameters".CO:%'
+            ></div>
+          </div>
+          <div>CO</div>
+          <input
+            type="text"
+            class="input-box"
+            id="text-box-co"
+            min="0.0"
+            max="100.0"
+            value="00.000"
+          />
+        </div>
+      </div>
+      <div class="row controls">
+        <div class="group">
+          <label for="high-limit">High Limit</label>
+          <input type="text" id="high-limit" value="00.000" />
+        </div>
+        <div class="group">
+          <label for="low-limit">Low Limit</label>
+          <input type="text" id="low-limit" value="00.000" />
+        </div>
+        <div class="group" style="text-align: center" id="automanual_parent">
+          <label style="font-weight: 700">Mode</label>
+          <label id="auto_text" for="auto">→ Auto</label>
+          <label id="manual_text" for="manual">→ Manual</label>
+          <input type="button" id="A_M_button" value="Auto/Manual" />
+        </div>
+      </div>
+      <div class="buttons">
+        <button style="background-color: lightblue" id="CO_increase_button">
+          CO+
+        </button>
+        <button style="background-color: lightblue" id="CO_decrease_button">
+          CO-
+        </button>
+        <button style="background-color: lightgreen" id="SP_increase_button">
+          SP+
+        </button>
+        <button style="background-color: lightgreen" id="SP_decrease_button">
+          SP-
+        </button>
+      </div>
+      <div class="row">
+        <div class="group">
+          <label for="kp">KP</label>
+          <input type="text" id="kp" min="0.0" value="00.00" />
+        </div>
+        <div class="group">
+          <label for="ti">TI [ms]</label>
+          <input type="text" id="ti" value="00000" />
+        </div>
+        <div class="group">
+          <label for="td">TD [ms]</label>
+          <input type="text" id="td" value="00000" />
+        </div>
+      </div>
+      <div class="buttons">
+        <button style="background-color: orange" id="reset_button">
+          RESET
+        </button>
+        <button style="background-color: blue; color: white" id="next_button">
+          Next
+        </button>
+        <button style="background-color: orange" id="exit_button">Exit</button>
+      </div>
+    </div>
+  </body>
+  <!-- function for check login -->
+  <script type="text/javascript">
+    function convertToMilliseconds(timeString) {
+      // Extract the components using a regular expression
+      const match = timeString.match(
+        /T&#x23;(?:(\d+)D)?(?:_?(\d+)H)?(?:_?(\d+)M)?(?:_?(\d+)S)?(?:_?(\d+)MS)?/
+      );
+
+      if (!match) {
+        throw new Error("Invalid time format");
+      }
+
+      let i = 3;
+      let days = 0;
+      let hours = 0;
+      let minutes = 0;
+      let seconds = 0;
+      let milliseconds = 0;
+
+      days = parseInt(match[1] || "0", 10);
+      hours = parseInt(match[2] || "0", 10);
+      minutes = parseInt(match[3] || "0", 10);
+      seconds = parseInt(match[4] || "0", 10);
+      milliseconds = parseInt(match[5] || "0", 10);
+
+      if (
+        timeString.split("M").length == timeString.split("MS").length &&
+        timeString.split("MS")[0].split("_").length - 1 <= 0
+      ) {
+        milliseconds = minutes;
+        minutes = 0;
+      }
+
+      // Convert everything to milliseconds
+      const totalMilliseconds =
+        days * 24 * 60 * 60 * 1000 +
+        hours * 60 * 60 * 1000 +
+        minutes * 60 * 1000 +
+        seconds * 1000 +
+        milliseconds;
+
+      return totalMilliseconds;
+    }
+    const SP_input_textbox = document.getElementById("SP-input-textbox");
+    const Auto_Manual_button = document.getElementById("A_M_button");
+    const auto_text = document.getElementById("auto_text");
+    const manual_text = document.getElementById("manual_text");
+    const CO_input_textbox = document.getElementById("text-box-co");
+    const KP_input_textbox = document.getElementById("kp");
+    const TI_input_textbox = document.getElementById("ti");
+    const High_limit_textbox = document.getElementById("high-limit");
+    const Low_Limit_input_textbox = document.getElementById("low-limit");
+    const CO_increase_button = document.getElementById("CO_increase_button");
+    const CO_decrease_button = document.getElementById("CO_decrease_button");
+    const SP_increase_button = document.getElementById("SP_increase_button");
+    const SP_decrease_button = document.getElementById("SP_decrease_button");
+    const bar_pv_high_limit = document.getElementById("arrow-high-limit");
+    const bar_pv_low_limit = document.getElementById("arrow-low-limit");
+    const td_input_textbox = document.getElementById("td");
+    const bar_pv_high_limit_text = document.getElementById("arrow-high-limit-text");
+    const bar_pv_low_limit_text = document.getElementById("arrow-low-limit-text");
+    const reset_button = document.getElementById("reset_button");
+    const next_button = document.getElementById("next_button");
+    const exit_button = document.getElementById("exit_button");
+
+    var Manual_Auto = 0;
+    var now_json = {};
+
+    function updateAll() {
+      fetch("a.json")
+        .then((response) => response.json())
+        .then((data) => {
+          now_json = data;
+          document.getElementById("text-box-pv").value = String(data["PV"]);
+          // document.getElementById("SP-input-hidden").value = String(data["SP"]);
+          document.getElementById("bar-pv").style.height = data["PV"] + "%";
+          document.getElementById("bar-sp").style.height = data["SP"] + "%";
+          document.getElementById("bar-co").style.height = data["CO"] + "%";
+
+          var css_high_limit_bar = map(
+            data["TSH"] > 100 ? 100 : data["TSH"],
+            0,
+            100,
+            -31,
+            169
+          );
+          var css_low_limit_bar = map(
+            data["TSL"] > 100 ? 100 : data["TSL"],
+            0,
+            100,
+            -31,
+            169
+          );
+
+          bar_pv_high_limit.style.bottom = css_high_limit_bar + "px";
+          bar_pv_low_limit.style.bottom = css_low_limit_bar + "px";
+
+          function map(input, in_min, in_max, out_min, out_max) {
+            return (
+              ((input - in_min) * (out_max - out_min)) / (in_max - in_min) +
+              out_min
+            );
+          }
+
+          if (data["PV"] >= data["TSH"]) {
+            bar_pv_high_limit_text.textContent = "← ⚠️";
+            bar_pv_high_limit.style.right = "-47px";
+          }
+          if (data["PV"] <= data["TSL"]) {
+            bar_pv_low_limit_text.textContent = "⚠️ →";
+            bar_pv_low_limit.style.left = "-47px";
+          }
+          if (data["PV"] < data["TSH"] && data["PV"] > data["TSL"]) {
+            bar_pv_high_limit_text.textContent = "←";
+            bar_pv_low_limit_text.textContent = "→";
+            bar_pv_high_limit.style.right = "-20px";
+            bar_pv_low_limit.style.left = "-20px";
+          }
+
+          Manual_Auto = data["MA"];
+          if (Manual_Auto == 0) {
+            // Case Auto
+            auto_text.style.display = "block";
+            manual_text.style.display = "none";
+            CO_input_textbox.setAttribute("readonly", "true");
+            CO_input_textbox.style.backgroundColor = "#d9d9d9";
+            CO_increase_button.style.backgroundColor = "#d9d9d9";
+            CO_decrease_button.style.backgroundColor = "#d9d9d9";
+          } else {
+            // Case Manual
+            CO_input_textbox.removeAttribute("readonly");
+            auto_text.style.display = "none";
+            manual_text.style.display = "block";
+            CO_input_textbox.style.backgroundColor = "white";
+            CO_increase_button.style.backgroundColor = "lightblue";
+            CO_decrease_button.style.backgroundColor = "lightblue";
+          }
+        });
+    }
+
+    window.onload = function () {
+      updateAll();
+    };
+
+    window.setInterval(updateAll, 500);
+
+    CO_increase_button.addEventListener("click", function (e) {
+      if (Manual_Auto == 1) {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".CO':
+              parseFloat(CO_input_textbox.value) <= 99
+                ? parseFloat(CO_input_textbox.value) + 1
+                : 100,
+          }),
+        });
+      }
+    });
+
+    CO_decrease_button.addEventListener("click", function (e) {
+      if (Manual_Auto == 1) {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".CO':
+              parseFloat(CO_input_textbox.value) >= 1
+                ? parseFloat(CO_input_textbox.value) - 1
+                : 0,
+          }),
+        });
+      }
+    });
+
+    SP_increase_button.addEventListener("click", function (e) {
+      fetch("", {
+        method: "POST",
+        body: new URLSearchParams({
+          '"Parameters".SP':
+            parseFloat(SP_input_textbox.value) >= 99
+              ? 100
+              : parseFloat(SP_input_textbox.value) + 1,
+        }),
+      });
+    });
+
+    SP_decrease_button.addEventListener("click", function (e) {
+      fetch("", {
+        method: "POST",
+        body: new URLSearchParams({
+          '"Parameters".SP':
+            parseFloat(SP_input_textbox.value) <= 1
+              ? 0
+              : parseFloat(SP_input_textbox.value) - 1,
+        }),
+      });
+    });
+
+    reset_button.addEventListener("click", function (e) {
+      fetch("", {
+        method: "POST",
+        body: new URLSearchParams({
+          '"ResetHMI"': 1,
+        }),
+      });
+      setTimeout(function () {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"ResetHMI"': 0,
+          }),
+        });
+      }, 1000);
+    });
+
+    next_button.addEventListener("click", function (e) {
+      window.location.href = "graph.html";
+    });
+
+    exit_button.addEventListener("click", function (e) {
+      closeWindow();
+    });
+
+    function closeWindow() {
+      let new_window = open(window.location, "_self");
+      new_window.close();
+      return false;
+    }
+
+    // SP editing
+    var sp_editing = false;
+
+    function updateSP() {
+      let SP_value = now_json["SP"];
+      if (SP_value != SP_input_textbox.value && !sp_editing) {
+        SP_input_textbox.value = SP_value;
+      }
+    }
+    window.setInterval(updateSP, 500);
+
+    SP_input_textbox.addEventListener("focus", function () {
+      sp_editing = true;
+    });
+    SP_input_textbox.addEventListener("blur", function () {
+      sp_editing = false;
+    });
+
+    SP_input_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".SP':
+              SP_input_textbox.value >= 100
+                ? 100
+                : SP_input_textbox.value <= 0
+                ? 0
+                : SP_input_textbox.value,
+          }),
+        });
+      }
+    });
+
+    // KP editing
+    var kp_editing = false;
+
+    function updateKP() {
+      let KP_value = now_json["Kp"];
+      if (KP_value != KP_input_textbox.value && !kp_editing) {
+        KP_input_textbox.value = KP_value;
+      }
+    }
+    window.setInterval(updateKP, 500);
+
+    KP_input_textbox.addEventListener("focus", function () {
+      kp_editing = true;
+    });
+    KP_input_textbox.addEventListener("blur", function () {
+      kp_editing = false;
+    });
+
+    KP_input_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".Kp': KP_input_textbox.value,
+          }),
+        });
+      }
+    });
+
+    // TI editing
+    var ti_editing = false;
+
+    function updateTI() {
+      let TI_value = convertToMilliseconds(now_json["TI"]);
+      if (TI_value != TI_input_textbox.value && !ti_editing) {
+        TI_input_textbox.value = TI_value;
+      }
+    }
+    window.setInterval(updateTI, 500);
+
+    TI_input_textbox.addEventListener("focus", function () {
+      ti_editing = true;
+    });
+    TI_input_textbox.addEventListener("blur", function () {
+      ti_editing = false;
+    });
+
+    TI_input_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".TI': "T#" + TI_input_textbox.value + "ms",
+          }),
+        });
+      }
+    });
+
+    //TD editing
+    var td_editing = false;
+
+    function updateTD() {
+      let TD_value = convertToMilliseconds(now_json["TD"]);
+      if (TD_value != td_input_textbox.value && !td_editing) {
+        td_input_textbox.value = TD_value;
+      }
+    }
+    window.setInterval(updateTD, 500);
+
+    td_input_textbox.addEventListener("focus", function () {
+      td_editing = true;
+    });
+    td_input_textbox.addEventListener("blur", function () {
+      td_editing = false;
+    });
+
+    td_input_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".TD': "T#" + td_input_textbox.value + "ms",
+          }),
+        });
+      }
+    });
+
+    // Manual/Auto editing
+    Auto_Manual_button.addEventListener("click", function (e) {
+      fetch("", {
+        method: "POST",
+        body: new URLSearchParams({
+          '"Man/Auto_HMI"': Manual_Auto == 0 ? 1 : 0,
+        }),
+      });
+    });
+
+    // CO editing
+    var co_editing = false;
+
+    function updateCO() {
+      let CO_value = now_json["CO"];
+      if (CO_value != CO_input_textbox.value && !co_editing) {
+        CO_input_textbox.value = CO_value;
+      }
+    }
+    window.setInterval(updateCO, 500);
+
+    CO_input_textbox.addEventListener("focus", function () {
+      co_editing = true;
+    });
+    CO_input_textbox.addEventListener("blur", function () {
+      co_editing = false;
+    });
+
+    CO_input_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".CO': CO_input_textbox.value,
+          }),
+        });
+      }
+    });
+
+    var high_limit_editing = false;
+    var low_limit_editing = false;
+
+    function updateHighLimit() {
+      let high_limit_value = now_json["TSH"];
+      if (high_limit_value != High_limit_textbox.value && !high_limit_editing) {
+        High_limit_textbox.value = high_limit_value;
+      }
+    }
+    window.setInterval(updateHighLimit, 500);
+
+    High_limit_textbox.addEventListener("focus", function () {
+      high_limit_editing = true;
+    });
+    High_limit_textbox.addEventListener("blur", function () {
+      high_limit_editing = false;
+    });
+
+    High_limit_textbox.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        fetch("", {
+          method: "POST",
+          body: new URLSearchParams({
+            '"Parameters".TSH': High_limit_textbox.value,
+          }),
+        });
+      }
+    });
+
+    function updateLowLimit() {
+      let low_limit_value = now_json["TSL"];
+      if (
+        low_limit_value != document.getElementById("low-limit").value &&
+        !low_limit_editing
+      ) {
+        document.getElementById("low-limit").value = low_limit_value;
+      }
+    }
+    window.setInterval(updateLowLimit, 500);
+
+    document.getElementById("low-limit").addEventListener("focus", function () {
+      low_limit_editing = true;
+    });
+    document.getElementById("low-limit").addEventListener("blur", function () {
+      low_limit_editing = false;
+    });
+
+    document
+      .getElementById("low-limit")
+      .addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          fetch("", {
+            method: "POST",
+            body: new URLSearchParams({
+              '"Parameters".TSL': Low_Limit_input_textbox.value,
+            }),
+          });
+        }
+      });
+  </script>
+</html>

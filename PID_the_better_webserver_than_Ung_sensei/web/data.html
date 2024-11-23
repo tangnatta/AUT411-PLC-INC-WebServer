@@ -1,0 +1,25 @@
+<!-- bar pv -->
+<div class="bar-inner" id="bar-pv" style='height: :="Parameters".PV:%'></div>
+
+<!-- bar sp -->
+<div class="bar-inner" id="bar-sp" style='height: :="Parameters".SP:%'></div>
+
+<!-- bar co -->
+<div class="bar-inner" id="bar-co" style='height: :="Parameters".CO:%'></div>
+
+<!-- SP-input-hidden -->
+<input
+  type="text"
+  class="input-box"
+  hidden="true"
+  id="SP-input-hidden"
+  value=':="Parameters".SP:'
+/>
+
+<!-- SP-input-textbox -->
+<input
+  type="text"
+  id="text-box-pv"
+  class="input-box"
+  value=':="Parameters".PV:'
+/>

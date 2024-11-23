@@ -1,0 +1,11 @@
+{
+    "PV":":="Parameters".PV:",
+    "CO":":="Parameters".CO:",
+    "SP":":="Parameters".SP:",
+    "MA":":="Parameters".Manual_Auto:",
+    "Kp":":="Parameters".Kp:",
+    "TI":":="Parameters".TI:",
+    "TD":":="Parameters".TD:",
+    "TSL":":="Parameters".TSL:",
+    "TSH":":="Parameters".TSH:"
+}
